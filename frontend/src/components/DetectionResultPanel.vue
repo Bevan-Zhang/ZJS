@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { api, type DetectionResult } from '../api/client'
 import SampleSpotlight from './SampleSpotlight.vue'
+import DetectionStatsChart from './DetectionStatsChart.vue'
 
 const loading = ref(false)
 const result = ref<DetectionResult | null>(null)
@@ -33,6 +34,8 @@ async function view() {
       </div>
       <el-button type="primary" :loading="loading" @click="view">查看结果</el-button>
     </div>
+
+    <DetectionStatsChart v-if="result && result.file_count" :files="result.files" />
 
     <div v-for="f in (result?.files ?? [])" :key="f.name" class="file-card">
       <div class="fc-name">
