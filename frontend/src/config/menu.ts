@@ -37,8 +37,8 @@ export const menu: MenuGroup[] = [
     icon: 'Connection',
     children: [
       { path: '/trace/overview', title: '检测总览', desc: '系统当前检测到了什么：threat 列表与检测结果' },
-      { path: '/trace/analysis', title: '威胁链与意图分析', desc: '从当前威胁推导威胁传递链与攻击意图' },
-      { path: '/trace/graph', title: '图谱解释', desc: '攻击意图背后的局部图谱依据' },
+      { path: '/trace/analysis', title: '威胁溯源', desc: '从当前威胁回溯攻击阶段、传播路径与证据链' },
+      { path: '/trace/graph', title: '意图感知', desc: '结合局部知识图谱感知攻击意图与战术技术' },
     ],
   },
   {

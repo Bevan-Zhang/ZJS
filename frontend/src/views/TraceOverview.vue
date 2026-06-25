@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { trace, current, selectThreat } from '../stores/trace'
 import type { TraceThreat } from '../api/client'
 import ThreatBar from '../components/trace/ThreatBar.vue'
@@ -7,8 +7,9 @@ import ThreatBar from '../components/trace/ThreatBar.vue'
 const keyword = ref('')
 const attackFilter = ref('')
 const modalityFilter = ref('')
-const page = ref(1)
-const pageSize = ref(20)
+const tableRef = ref()
+const paused = ref(false)
+let scrollTimer: number | undefined
 
 const sevType = (s?: string) =>
   s === 'high' ? 'danger' : s === 'medium' ? 'warning' : s ? 'info' : 'info'
@@ -34,24 +35,46 @@ const filteredThreats = computed(() => {
     ].some((value) => String(value ?? '').toLowerCase().includes(q))
   })
 })
-const pagedThreats = computed(() => {
-  const start = (page.value - 1) * pageSize.value
-  return filteredThreats.value.slice(start, start + pageSize.value)
-})
-
-watch([keyword, attackFilter, modalityFilter, pageSize], () => {
-  page.value = 1
-})
-
 const rowClass = ({ row }: { row: TraceThreat }) =>
   row.threat_id === trace.currentId ? 'cur-row' : ''
 const onRowClick = (row: TraceThreat) => selectThreat(row.threat_id)
+
+const tableBody = () =>
+  tableRef.value?.$el?.querySelector('.el-scrollbar__wrap') as HTMLElement | null
+
+function resetScroll() {
+  nextTick(() => {
+    const body = tableBody()
+    if (body) body.scrollTop = 0
+  })
+}
+
+function startAutoScroll() {
+  stopAutoScroll()
+  scrollTimer = window.setInterval(() => {
+    if (paused.value || trace.loadingThreats) return
+    const body = tableBody()
+    if (!body || body.scrollHeight <= body.clientHeight + 2) return
+    const next = body.scrollTop + 1
+    body.scrollTop = next >= body.scrollHeight - body.clientHeight ? 0 : next
+  }, 55)
+}
+
+function stopAutoScroll() {
+  if (scrollTimer) window.clearInterval(scrollTimer)
+  scrollTimer = undefined
+}
+
+watch([keyword, attackFilter, modalityFilter], resetScroll)
+watch(() => filteredThreats.value.length, resetScroll)
+
+onMounted(startAutoScroll)
+onBeforeUnmount(stopAutoScroll)
 </script>
 
 <template>
   <div>
     <h2 class="page-title">检测总览</h2>
-    <p class="page-desc">展示网元3当前批次提交的 120 条真实多模态流量检测结果。</p>
 
     <ThreatBar :show-detect="true" />
 
@@ -68,15 +91,21 @@ const onRowClick = (row: TraceThreat) => selectThreat(row.threat_id)
 
     <div class="grid">
       <div class="tech-panel">
-        <div class="tech-h">威胁列表 <span class="cnt">点击任意行联动完整分析</span></div>
+        <div class="tech-h">
+          威胁列表
+          <span class="cnt">自动滚动展示 {{ filteredThreats.length }} 条，悬停暂停，点击联动分析</span>
+        </div>
         <el-table
-          :data="pagedThreats"
+          ref="tableRef"
+          :data="filteredThreats"
           size="small"
-          height="500"
+          height="620"
           v-loading="trace.loadingThreats"
           highlight-current-row
           :row-class-name="rowClass"
           @row-click="onRowClick"
+          @mouseenter="paused = true"
+          @mouseleave="paused = false"
           style="background: transparent; cursor: pointer"
         >
           <el-table-column prop="threat_id" label="threat_id" min-width="205" show-overflow-tooltip />
@@ -88,15 +117,6 @@ const onRowClick = (row: TraceThreat) => selectThreat(row.threat_id)
             <template #default="{ row }">{{ row.ml_confidence ?? '-' }}</template>
           </el-table-column>
         </el-table>
-        <el-pagination
-          v-model:current-page="page"
-          v-model:page-size="pageSize"
-          class="pagination"
-          background
-          layout="total, sizes, prev, pager, next"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="filteredThreats.length"
-        />
       </div>
 
       <div class="tech-panel">
@@ -148,7 +168,6 @@ const onRowClick = (row: TraceThreat) => selectThreat(row.threat_id)
 .kv dt { width: 96px; color: var(--tech-text-dim); font-size: 13px; flex-shrink: 0; }
 .kv dd { margin: 0; color: #eaf6ff; font-size: 14px; word-break: break-all; }
 .mono { font-family: 'Consolas', monospace; }
-.pagination { justify-content: flex-end; margin-top: 14px; }
 .evidence { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
 .evidence-title { width: 100%; color: var(--tech-text-dim); font-size: 13px; margin-bottom: 2px; }
 .dim { color: var(--tech-text-dim); font-size: 13px; }

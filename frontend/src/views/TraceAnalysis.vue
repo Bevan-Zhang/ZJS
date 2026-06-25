@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// 页面2 威胁链与意图分析：从当前威胁推导 chain 与 intent。
-import { computed } from 'vue'
-import { trace, current } from '../stores/trace'
+// 页面2 威胁溯源：从当前威胁回溯阶段链、传播路径与意图线索。
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { trace, current, selectThreat } from '../stores/trace'
 import type { GraphNode, GraphEdge } from '../api/client'
 import ThreatBar from '../components/trace/ThreatBar.vue'
 import GraphView from '../components/trace/GraphView.vue'
@@ -28,12 +28,46 @@ const chainGraph = computed<{ nodes: GraphNode[]; edges: GraphEdge[] }>(() => {
 })
 
 const intents = computed(() => trace.intent?.intents ?? trace.intent?.local_intents ?? [])
+const lastSync = ref('')
+let refreshTimer: number | undefined
+
+const syncLabel = computed(() => lastSync.value || '等待同步')
+
+async function refreshTraceDetail() {
+  if (!trace.currentId) return
+  await selectThreat(trace.currentId)
+  lastSync.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+}
+
+onMounted(() => {
+  void refreshTraceDetail()
+  refreshTimer = window.setInterval(refreshTraceDetail, 8000)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer) window.clearInterval(refreshTimer)
+})
+
+watch(() => trace.loadingDetail, (loading) => {
+  if (!loading && trace.currentId) {
+    lastSync.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  }
+})
 </script>
 
 <template>
   <div>
-    <h2 class="page-title">威胁链与意图分析</h2>
-    <p class="page-desc">威胁检测 → 威胁传递链构造 → 攻击意图解释。</p>
+    <div class="title-row">
+      <div>
+        <h2 class="page-title">威胁溯源</h2>
+        <p class="page-desc">基于当前 threat 持续回溯攻击阶段、传播路径与证据链。</p>
+      </div>
+      <div class="live-pill">
+        <span class="pulse" />
+        <span>{{ trace.loadingDetail ? '同步中' : '实时联动' }}</span>
+        <b>{{ syncLabel }}</b>
+      </div>
+    </div>
 
     <ThreatBar />
 
@@ -48,7 +82,7 @@ const intents = computed(() => trace.intent?.intents ?? trace.intent?.local_inte
     <div class="grid">
       <!-- chain 列表 -->
       <div class="tech-panel">
-        <div class="tech-h">威胁传递链 <span class="cnt">{{ trace.chains.length }} 条</span></div>
+        <div class="tech-h">溯源路径 <span class="cnt">{{ trace.chains.length }} 条候选链</span></div>
         <el-table :data="trace.chains" size="small" v-loading="trace.loadingDetail" style="background: transparent">
           <el-table-column type="expand">
             <template #default="{ row }">
@@ -61,8 +95,8 @@ const intents = computed(() => trace.intent?.intents ?? trace.intent?.local_inte
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="theme" label="theme" width="160" />
-          <el-table-column prop="source" label="source" width="90" />
+          <el-table-column prop="theme" label="路径主题" width="160" />
+          <el-table-column prop="source" label="来源" width="90" />
           <el-table-column prop="total_stages" label="阶段数" width="80" align="center" />
           <el-table-column prop="confidence" label="置信度" width="90" align="center" />
         </el-table>
@@ -70,24 +104,24 @@ const intents = computed(() => trace.intent?.intents ?? trace.intent?.local_inte
 
       <!-- chain 图 -->
       <div class="tech-panel">
-        <div class="tech-h">威胁链图</div>
-        <div class="graph-tip">拖动节点调整布局，滚轮缩放，拖动画布平移，点击节点聚焦邻接关系。</div>
+        <div class="tech-h">溯源链路图</div>
+        <div class="graph-tip">当前 threat 到各阶段节点的实时联动路径。</div>
         <GraphView v-if="chainGraph.nodes.length > 1" :nodes="chainGraph.nodes" :edges="chainGraph.edges" height="360px" />
         <p v-else class="tech-sub" style="margin: 0">当前威胁暂无可视化链路。</p>
       </div>
     </div>
 
-    <!-- 攻击意图区 -->
+    <!-- 源头意图线索 -->
     <div class="tech-panel" style="margin-top: 18px">
       <div class="tech-h">
-        攻击意图
+        源头意图线索
         <span class="cnt" v-if="trace.intent">
           来源 <b class="cyan">{{ intents[0]?.source ?? (trace.intent.neo4j === 'degraded' ? 'local_subgraph' : '-') }}</b>
           · related {{ trace.intent.related ?? 0 }}
         </span>
       </div>
       <div v-if="trace.intent?.keywords?.length" class="kw">
-        关键词：<el-tag v-for="k in trace.intent.keywords" :key="k" size="small" effect="plain" class="kwtag">{{ k }}</el-tag>
+        触发证据：<el-tag v-for="k in trace.intent.keywords" :key="k" size="small" effect="plain" class="kwtag">{{ k }}</el-tag>
       </div>
       <div class="intents">
         <div v-for="(it, i) in intents" :key="i" class="intent-card">
@@ -110,6 +144,11 @@ const intents = computed(() => trace.intent?.intents ?? trace.intent?.local_inte
 <style scoped>
 .page-title { margin: 0 0 6px; font-size: 26px; color: #eaf6ff; text-shadow: 0 0 16px var(--tech-glow); }
 .page-desc { color: var(--tech-text-dim); margin: 0 0 18px; }
+.title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.live-pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(0,229,255,0.35); border-radius: 999px; padding: 7px 12px; color: var(--tech-text-dim); background: rgba(0,229,255,0.07); font-size: 13px; }
+.live-pill b { color: #eaf6ff; font-family: 'Consolas', monospace; }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--tech-cyan); box-shadow: 0 0 12px var(--tech-cyan); animation: pulse 1.3s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: .45; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.25); } }
 .summary { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 18px; }
 .summary span { color: var(--tech-text-dim); font-size: 14px; }
 .summary b { color: #eaf6ff; }
