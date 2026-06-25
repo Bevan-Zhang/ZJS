@@ -9,35 +9,46 @@ const { dash, online, refresh } = useDashboard()
 const STRATEGY = 'mimetic_adaptive_defense'
 const running = computed(() => isRunning(pickMimetic(dash.value, STRATEGY)))
 
-// ---- 异构执行体（后端控制上下线）----
-interface Executor {
-  id: number
-  name: string
-  type: 'traditional' | 'optimized'  // 传统 / 优化后
-  online: boolean
-  desc: string
+// ---- 异构执行体（优先真实数据，否则 mock）----
+interface Exec {
+  id: number; name: string; type: 'traditional' | 'optimized'; online: boolean; desc: string
 }
-const executors = ref<Executor[]>([
-  { id: 1, name: 'REMI-AIA',         type: 'optimized',   online: true,  desc: '免疫优化代理 (s4:8080)' },
-  { id: 2, name: 'Voting-5000',      type: 'traditional', online: true,  desc: '传统投票裁决器' },
-  { id: 3, name: 'hetero_ubuntu',    type: 'traditional', online: true,  desc: 'Ubuntu + Apache' },
-  { id: 4, name: 'hetero_centos',    type: 'traditional', online: true,  desc: 'CentOS + Nginx' },
-  { id: 5, name: 'hetero_debian',    type: 'optimized',   online: false, desc: 'Debian + Tomcat (REMI 优化后)' },
-  { id: 6, name: 'hetero_alpine',    type: 'traditional', online: true,  desc: 'Alpine + Lighttpd' },
-  { id: 7, name: 'hetero_fedora',    type: 'optimized',   online: true,  desc: 'Fedora + Caddy (REMI 优化后)' },
-])
+const MOCK_EXECUTORS: Exec[] = [
+  { id: 1, name: 'gene_008',  type: 'traditional', online: true,  desc: 'OS:ubuntu   APP:nginx    DB:mysql      LOG:firewall' },
+  { id: 2, name: 'gene_014',  type: 'traditional', online: true,  desc: 'OS:centos   APP:iis      DB:postgresql LOG:waf' },
+  { id: 3, name: 'gene_033',  type: 'traditional', online: true,  desc: 'OS:debian   APP:apache   DB:mysql      LOG:ids' },
+  { id: 4, name: 'gene_005',  type: 'traditional', online: true,  desc: 'OS:ubuntu   APP:iis      DB:postgresql LOG:firewall' },
+  { id: 5, name: 'REMI-AIA',  type: 'optimized',   online: true,  desc: '免疫优化代理 (s4:8080)' },
+  { id: 6, name: 'REMI-vote', type: 'optimized',   online: true,  desc: '优化投票裁决器 (:5000)' },
+  { id: 7, name: 'gene_037',  type: 'traditional', online: false, desc: 'OS:debian   APP:apache   DB:postgresql LOG:waf' },
+]
+const executors = computed(() => {
+  const real = dash.value?.adaptive?.executors as any[] | undefined
+  return real && real.length ? real : MOCK_EXECUTORS
+})
 
-const onlineExecutors = computed(() => executors.value.filter((e) => e.online))
-const traditionalCount = computed(() => executors.value.filter((e) => e.type === 'traditional' && e.online).length)
-const optimizedCount = computed(() => executors.value.filter((e) => e.type === 'optimized' && e.online).length)
+const onlineExecutors = computed(() => executors.value.filter((e: any) => e.online))
+const traditionalCount = computed(() => executors.value.filter((e: any) => e.type === 'traditional' && e.online).length)
+const optimizedCount = computed(() => executors.value.filter((e: any) => e.type === 'optimized' && e.online).length)
 
-// ---- 历史防御成功率（动态模拟）----
+// ---- 历史防御成功率（优先真实数据，否则动态 mock）----
+const realRate = computed(() => dash.value?.adaptive?.success_rate)
+const realHistory = computed(() => dash.value?.adaptive?.rate_history as number[] | undefined)
+
 const successRate = ref(87.3)
 const rateDelta = ref(2.1)
 const rateHistory = ref<number[]>([82.4, 83.1, 79.8, 85.2, 86.7, 84.9, 87.3])
 let rateTimer: number | undefined
 
 function tickRate() {
+  if (realRate.value != null) {
+    // 有真实数据时直接用
+    successRate.value = realRate.value
+    rateDelta.value = 0
+    if (realHistory.value?.length) rateHistory.value = [...realHistory.value]
+    return
+  }
+  // mock 动态波动
   const delta = (Math.random() - 0.45) * 1.8
   successRate.value = Math.min(99.9, Math.max(75, +(successRate.value + delta).toFixed(1)))
   rateDelta.value = +(delta).toFixed(1)
