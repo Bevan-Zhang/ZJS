@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { isRunning, pickMimetic } from '../../utils/defense'
 import { useDashboard } from '../../composables/useDashboard'
 import DefenseControl from '../../components/DefenseControl.vue'
@@ -9,41 +9,18 @@ const { dash, online, refresh } = useDashboard()
 const STRATEGY = 'mimetic_intrusion_detection'
 const running = computed(() => isRunning(pickMimetic(dash.value, STRATEGY)))
 
-// ---- 异构裁决模型（后端控制上下线）----
-interface ModelItem {
-  id: number    // 序号 ①~④
-  name: string  // 模型原名
-  desc: string  // 特征描述
-  active: boolean
-}
-const MODELS = ref<ModelItem[]>([
+// ---- 异构裁决模型（从 dashboard 读取）----
+const MODELS = computed(() => (dash.value?.intrusion?.models as any[]) ?? [
   { id: 1, name: 'CNN', desc: '卷积特征提取', active: true },
   { id: 2, name: 'GRU', desc: '时序门控推理', active: true },
   { id: 3, name: 'DNN', desc: '深度全连接', active: true },
   { id: 4, name: 'MLP', desc: '多层感知', active: false },
 ])
 
-const dormantModel = computed(() => MODELS.value.find((m) => !m.active))
+const dormantModel = computed(() => MODELS.value.find((m: any) => !m.active))
 
-// ---- 恶意流量捕获列表 ----
-interface MalFlow {
-  id: number
-  time: string
-  src: string
-  dst: string
-  type: string
-  verdict: string
-}
-const malFlows = ref<MalFlow[]>([
-  { id: 1, time: '14:32:07', src: '10.0.4.51', dst: '192.168.1.2', type: 'TLS 隧道', verdict: '恶意' },
-  { id: 2, time: '14:32:11', src: '10.0.4.88', dst: '192.168.1.2', type: 'DNS 隐蔽', verdict: '恶意' },
-  { id: 3, time: '14:32:18', src: '10.0.5.12', dst: '192.168.1.2', type: 'HTTP C2', verdict: '恶意' },
-  { id: 4, time: '14:32:25', src: '10.0.4.63', dst: '192.168.1.2', type: 'ICMP 隧道', verdict: '恶意' },
-  { id: 5, time: '14:32:31', src: '10.0.6.7',  dst: '192.168.1.2', type: 'SSH 异常', verdict: '恶意' },
-  { id: 6, time: '14:32:39', src: '10.0.4.51', dst: '192.168.1.2', type: 'TLS 隧道', verdict: '恶意' },
-  { id: 7, time: '14:32:44', src: '10.0.5.99', dst: '192.168.1.2', type: 'DNS 隐蔽', verdict: '恶意' },
-  { id: 8, time: '14:32:50', src: '10.0.4.17', dst: '192.168.1.2', type: 'HTTP C2', verdict: '恶意' },
-])
+// ---- 恶意流量捕获列表（从 dashboard 读取）----
+const malFlows = computed(() => (dash.value?.intrusion?.malicious_flows as any[]) ?? [])
 </script>
 
 <template>

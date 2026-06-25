@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { isRunning, pickMimetic } from '../../utils/defense'
 import { useDashboard } from '../../composables/useDashboard'
 import DefenseControl from '../../components/DefenseControl.vue'
@@ -9,38 +9,18 @@ const { dash, online, refresh } = useDashboard()
 const STRATEGY = 'mimetic_honeypot'
 const running = computed(() => isRunning(pickMimetic(dash.value, STRATEGY)))
 
-// ---- 诱捕率 ----
-const trapRate = ref(73.6)
-let trapTimer: number | undefined
-
-function tickTrap() {
-  trapRate.value = +(trapRate.value + (Math.random() - 0.45) * 2).toFixed(1)
-  trapRate.value = Math.min(95, Math.max(50, trapRate.value))
-}
-onMounted(() => { trapTimer = window.setInterval(tickTrap, 3000) })
-onBeforeUnmount(() => { trapTimer && window.clearInterval(trapTimer) })
+// ---- 诱捕率（从 dashboard 读取）----
+const trapRate = computed(() => dash.value?.honeypot?.trap_rate ?? 0)
 
 // 环形仪表盘 SVG 参数
 const RING_R = 32; const RING_C = 2 * Math.PI * RING_R
 const ringOffset = computed(() => RING_C * (1 - trapRate.value / 100))
 
-// ---- 攻击类型捕获次数 ----
-interface AttackStat {
-  type: string
-  count: number
-}
-const attackStats = ref<AttackStat[]>([
-  { type: 'SQL 注入', count: 47 },
-  { type: 'Apache CVE-2021-42013', count: 35 },
-  { type: 'Nmap 扫描', count: 82 },
-  { type: '目录扫描', count: 63 },
-  { type: 'XSS 跨站脚本', count: 28 },
-  { type: 'SSH 暴力破解', count: 41 },
-  { type: 'DNS 隧道', count: 19 },
-])
+// ---- 攻击类型捕获次数（从 dashboard 读取）----
+const attackStats = computed(() => (dash.value?.honeypot?.attack_stats as any[]) ?? [])
 
-const maxCount = computed(() => Math.max(...attackStats.value.map((a) => a.count), 1))
-const totalAttacks = computed(() => attackStats.value.reduce((s, a) => s + a.count, 0))
+const maxCount = computed(() => Math.max(...attackStats.value.map((a: any) => a.count), 1))
+const totalAttacks = computed(() => attackStats.value.reduce((s: number, a: any) => s + a.count, 0))
 function barWidth(c: number) { return `${(c / maxCount.value) * 100}%` }
 </script>
 
