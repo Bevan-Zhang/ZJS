@@ -23,7 +23,6 @@ const MODELS = ref<ModelItem[]>([
   { id: 4, name: 'MLP', desc: '多层感知', active: false },
 ])
 
-const activeModels = computed(() => MODELS.value.filter((m) => m.active))
 const dormantModel = computed(() => MODELS.value.find((m) => !m.active))
 
 // ---- 恶意流量捕获列表 ----
@@ -112,7 +111,7 @@ const malFlows = ref<MalFlow[]>([
           <el-table-column prop="dst" label="目的 IP" width="120" />
           <el-table-column prop="type" label="攻击类型" min-width="110" />
           <el-table-column prop="verdict" label="裁决" width="70" align="center">
-            <template #default="{ row }">
+            <template #default>
               <span class="verdict-tag mal">恶意</span>
             </template>
           </el-table-column>

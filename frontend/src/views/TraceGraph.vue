@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// 页面3 图谱解释：为什么给出这个 intent —— 局部图谱依据。
-import { computed } from 'vue'
-import { trace, current } from '../stores/trace'
+// 页面3 意图感知：结合局部知识图谱持续感知攻击意图。
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { trace, current, selectThreat } from '../stores/trace'
 import ThreatBar from '../components/trace/ThreatBar.vue'
 import GraphView from '../components/trace/GraphView.vue'
 
@@ -15,12 +15,46 @@ const highlight = computed(() => {
   return ids
 })
 const capecNodes = computed(() => (g.value?.nodes ?? []).filter((n) => n.type === 'capec'))
+const lastSync = ref('')
+let refreshTimer: number | undefined
+
+const syncLabel = computed(() => lastSync.value || '等待同步')
+
+async function refreshIntentGraph() {
+  if (!trace.currentId) return
+  await selectThreat(trace.currentId)
+  lastSync.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+}
+
+onMounted(() => {
+  void refreshIntentGraph()
+  refreshTimer = window.setInterval(refreshIntentGraph, 8000)
+})
+
+onBeforeUnmount(() => {
+  if (refreshTimer) window.clearInterval(refreshTimer)
+})
+
+watch(() => trace.loadingDetail, (loading) => {
+  if (!loading && trace.currentId) {
+    lastSync.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  }
+})
 </script>
 
 <template>
   <div>
-    <h2 class="page-title">图谱解释</h2>
-    <p class="page-desc">攻击意图解释 → 图谱依据展示：当前威胁命中的局部知识图谱。</p>
+    <div class="title-row">
+      <div>
+        <h2 class="page-title">意图感知</h2>
+        <p class="page-desc">结合当前威胁命中的局部知识图谱，持续感知攻击意图与战术技术。</p>
+      </div>
+      <div class="live-pill">
+        <span class="pulse" />
+        <span>{{ trace.loadingDetail ? '同步中' : '实时联动' }}</span>
+        <b>{{ syncLabel }}</b>
+      </div>
+    </div>
 
     <ThreatBar />
 
@@ -36,8 +70,8 @@ const capecNodes = computed(() => (g.value?.nodes ?? []).filter((n) => n.type ==
     <div class="grid">
       <!-- 图谱可视化 -->
       <div class="tech-panel">
-        <div class="tech-h">局部图谱（threat · stage · CAPEC · tactic · technique）</div>
-        <div class="graph-tip">拖动节点调整布局，滚轮缩放，拖动画布平移，点击节点聚焦邻接关系。</div>
+        <div class="tech-h">意图知识图谱（threat · stage · CAPEC · tactic · technique）</div>
+        <div class="graph-tip">当前 threat 命中节点与战术技术关系实时刷新。</div>
         <GraphView
           v-if="g && g.nodes.length > 1"
           :nodes="g.nodes"
@@ -52,9 +86,9 @@ const capecNodes = computed(() => (g.value?.nodes ?? []).filter((n) => n.type ==
 
       <!-- 命中依据面板 -->
       <div class="tech-panel">
-        <div class="tech-h">命中依据</div>
+        <div class="tech-h">意图命中依据</div>
         <div v-if="g?.keywords?.length" class="kw">
-          匹配关键词：<el-tag v-for="k in g.keywords" :key="k" size="small" effect="plain" class="kwtag">{{ k }}</el-tag>
+          触发证据：<el-tag v-for="k in g.keywords" :key="k" size="small" effect="plain" class="kwtag">{{ k }}</el-tag>
         </div>
         <div class="capecs">
           <div v-for="n in capecNodes" :key="n.id" class="cap">
@@ -86,6 +120,11 @@ const capecNodes = computed(() => (g.value?.nodes ?? []).filter((n) => n.type ==
 <style scoped>
 .page-title { margin: 0 0 6px; font-size: 26px; color: #eaf6ff; text-shadow: 0 0 16px var(--tech-glow); }
 .page-desc { color: var(--tech-text-dim); margin: 0 0 18px; }
+.title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.live-pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(0,229,255,0.35); border-radius: 999px; padding: 7px 12px; color: var(--tech-text-dim); background: rgba(0,229,255,0.07); font-size: 13px; }
+.live-pill b { color: #eaf6ff; font-family: 'Consolas', monospace; }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--tech-cyan); box-shadow: 0 0 12px var(--tech-cyan); animation: pulse 1.3s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: .45; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.25); } }
 .summary { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 18px; }
 .summary span { color: var(--tech-text-dim); font-size: 14px; }
 .summary b { color: #eaf6ff; }
