@@ -11,4 +11,20 @@ export default defineConfig({
       '/api': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },
+  build: {
+    // controller 上 docker 构建内存有限：跳过逐 chunk 的 gzip 体积统计（省内存/提速），
+    // 并把大依赖拆成独立 chunk，避免单个 1MB+ 巨块拉高生成阶段峰值内存。
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('echarts') || id.includes('zrender')) return 'echarts'
+          if (id.includes('element-plus') || id.includes('@element-plus')) return 'element-plus'
+          return 'vendor'
+        },
+      },
+    },
+  },
 })
