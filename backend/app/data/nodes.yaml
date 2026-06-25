@@ -1,0 +1,72 @@
+# 节点注册表 —— 拓扑来自用户提供的网络配置
+# 凭据(password/key_path)留空，走 .env 的 SSH_DEFAULT_* 或 NODE_<ID>_PASSWORD 注入。
+# 后续新增网元(2/5/6/8/9、server2)拿到 SSH IP 后，照格式追加即可。
+nodes:
+  # ssh_host 走 controller 直连网卡对端 IP（管理网 10.130.131.x 从 controller 不可达）
+  - id: host1
+    name: host1
+    role: host
+    ssh_host: 192.168.10.2       # 直连 ens16；管理网 10.130.131.240
+    direct_ip: 192.168.10.2
+    direct_iface: ens16
+
+  - id: netunit1
+    name: 多模态网元1
+    role: netunit
+    ssh_host: 192.168.1.2        # 直连 ens10；管理网 10.130.131.254
+    direct_ip: 192.168.1.2
+    direct_iface: ens10
+
+  - id: netunit3
+    name: 多模态网元3
+    role: netunit
+    ssh_host: 192.168.3.2        # 直连 ens7；管理网 10.130.131.249
+    direct_ip: 192.168.3.2
+    direct_iface: ens7
+
+  - id: netunit4
+    name: 多模态网元4
+    role: netunit
+    ssh_host: 192.168.4.2        # 直连 ens15；管理网 10.130.31.51
+    direct_ip: 192.168.4.2
+    direct_iface: ens15
+
+  - id: netunit7
+    name: 多模态网元7
+    role: netunit
+    ssh_host: 192.168.7.2        # 直连 ens8；管理网 10.130.131.248
+    direct_ip: 192.168.7.2
+    direct_iface: ens8
+
+  - id: server1
+    name: server1
+    role: server
+    ssh_host: 192.168.11.2       # 直连 ens17；管理网 10.130.131.216
+    direct_ip: 192.168.11.2
+    direct_iface: ens17
+
+  # --- 以下节点尚未提供 SSH IP，先占位、enabled=false ---
+  - id: netunit2
+    name: 多模态网元2
+    role: netunit
+    enabled: false
+  - id: netunit5
+    name: 多模态网元5
+    role: netunit
+    enabled: false
+  - id: netunit6
+    name: 多模态网元6
+    role: netunit
+    enabled: false
+  - id: netunit8
+    name: 多模态网元8
+    role: netunit
+    enabled: false
+  - id: netunit9
+    name: 多模态网元9
+    role: netunit
+    enabled: false
+  - id: server2
+    name: server2
+    role: server
+    enabled: false

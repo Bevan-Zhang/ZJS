@@ -1,0 +1,30 @@
+# 预设任务 —— 每条对应前端一个独立控制台（运行/结束/实时输出）。
+# 改完只需 docker compose restart backend（已挂载卷，无需重建）。
+presets:
+  - id: host1_sender
+    name: 流量发送 (sender.py)
+    node_id: host1
+    workdir: /home/p4/njupt_traffic_sender
+    command: python3 sender.py
+    sudo: true                       # sender 发原始包需 root
+    stop_pattern: sender.py
+    desc: 在 host1 运行 sender.py 发送 pcap 流量
+
+  - id: netunit1_listener
+    name: 流量监听 (host1_listener.py)
+    node_id: netunit1
+    workdir: /home/p4/njupt_detection_models
+    command: python3 host1_listener.py
+    sudo: true                        # sudo python3 host1_listener.py
+    stop_pattern: host1_listener.py
+    desc: 在 网元1 运行 host1_listener.py 监听流量
+
+  - id: netunit1_main
+    name: 检测模型 (main.py)
+    node_id: netunit1
+    workdir: /home/p4/njupt_detection_models/detection_models
+    venv: /home/p4/.virtualenvs/CENI  # source 激活后再 python3 main.py
+    command: python3 main.py
+    sudo: false                       # 手动流程未用 sudo
+    stop_pattern: main.py
+    desc: 在 网元1 venv(CENI) 中运行 detection_models/main.py 进行检测

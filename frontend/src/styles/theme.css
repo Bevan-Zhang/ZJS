@@ -1,0 +1,163 @@
+/* ===== 科技感深色主题 ===== */
+:root {
+  --tech-bg: #060d1f;
+  --tech-bg-2: #0a1530;
+  --tech-panel: rgba(16, 32, 64, 0.55);
+  --tech-border: rgba(64, 158, 255, 0.25);
+  --tech-cyan: #00e5ff;
+  --tech-blue: #3b82f6;
+  --tech-glow: rgba(0, 229, 255, 0.45);
+  --tech-text: #c8e1ff;
+  --tech-text-dim: #7d94b8;
+}
+
+html, body, #app { margin: 0; height: 100%; }
+
+body {
+  background: var(--tech-bg);
+  color: var(--tech-text);
+  font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+
+/* 全局网格 + 辉光背景 */
+#app::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(0, 229, 255, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, rgba(59, 130, 246, 0.14), transparent 60%),
+    linear-gradient(180deg, var(--tech-bg) 0%, var(--tech-bg-2) 100%);
+  pointer-events: none;
+}
+#app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(64, 158, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64, 158, 255, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.app-shell { position: relative; z-index: 1; }
+
+/* ===== 顶栏 ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: linear-gradient(90deg, rgba(10, 21, 48, 0.9), rgba(10, 21, 48, 0.5));
+  border-bottom: 1px solid var(--tech-border);
+  backdrop-filter: blur(8px);
+}
+.app-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #fff, var(--tech-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px var(--tech-glow);
+}
+.app-title .dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  margin-right: 12px;
+  border-radius: 50%;
+  background: var(--tech-cyan);
+  box-shadow: 0 0 12px var(--tech-cyan);
+  animation: pulse 1.6s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.header-spacer { flex: 1; }
+.header-stat { color: var(--tech-text-dim); font-size: 13px; margin-left: 20px; }
+.header-stat b { color: var(--tech-cyan); }
+
+/* ===== 侧边栏 ===== */
+.app-aside {
+  width: 248px;
+  background: rgba(8, 18, 40, 0.6);
+  border-right: 1px solid var(--tech-border);
+  backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+.app-aside .el-menu { background: transparent; border-right: none; }
+.app-aside .el-sub-menu__title,
+.app-aside .el-menu-item {
+  color: var(--tech-text-dim);
+}
+.app-aside .el-sub-menu__title:hover,
+.app-aside .el-menu-item:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: var(--tech-cyan);
+}
+.app-aside .el-menu-item.is-active {
+  color: var(--tech-cyan);
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.18), transparent);
+  border-left: 3px solid var(--tech-cyan);
+}
+
+/* ===== 卡片/面板通用 ===== */
+.tech-panel {
+  position: relative;
+  background: var(--tech-panel);
+  border: 1px solid var(--tech-border);
+  border-radius: 10px;
+  padding: 18px;
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 30px rgba(0, 229, 255, 0.04);
+}
+.tech-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 16px;
+  width: 48px; height: 2px;
+  background: var(--tech-cyan);
+  box-shadow: 0 0 10px var(--tech-cyan);
+}
+.tech-h {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e6f3ff;
+  margin: 0 0 4px;
+}
+.tech-sub { color: var(--tech-text-dim); font-size: 13px; margin: 0 0 16px; }
+
+/* Element Plus 暗色微调 */
+.el-card { background: var(--tech-panel) !important; border: 1px solid var(--tech-border) !important; }
+pre.tech-out {
+  background: #02060f;
+  color: #9fe6ff;
+  border: 1px solid var(--tech-border);
+  border-radius: 6px;
+  padding: 10px;
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+pre.tech-out.err { color: #ff8a80; }
+
+/* ===== 模态色板 + 命中/误判（检测流与结果卡共用，颜色编码真实信息）===== */
+.mod {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 46px; padding: 0 7px; height: 18px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  border: 1px solid; line-height: 1;
+}
+.mod-ipv4  { color: #2ad1ff; border-color: rgba(42,209,255,.45);  background: rgba(42,209,255,.10); }
+.mod-ipv6  { color: #b79cff; border-color: rgba(183,156,255,.45); background: rgba(183,156,255,.10); }
+.mod-mpls  { color: #ffc05c; border-color: rgba(255,192,92,.45);  background: rgba(255,192,92,.10); }
+.mod-geo   { color: #36e3a3; border-color: rgba(54,227,163,.45);  background: rgba(54,227,163,.10); }
+.mod-scion { color: #ff79b0; border-color: rgba(255,121,176,.45); background: rgba(255,121,176,.10); }
+.mod-na    { color: #7d94b8; border-color: rgba(125,148,184,.4);  background: rgba(125,148,184,.08); }
+
+.vd { font-weight: 700; font-size: 11px; letter-spacing: .3px; }
+.vd-hit  { color: #36e3a3; }
+.vd-miss { color: #ff7a7a; }

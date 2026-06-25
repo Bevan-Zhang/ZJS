@@ -1,0 +1,23 @@
+# 部署在 controller(10.130.131.239)上。
+# backend 用 host 网络，确保能 SSH 到管理网(10.130.131.x)和直连网卡(192.168.x.x)。
+services:
+  backend:
+    build: ./backend
+    container_name: cp-backend
+    restart: unless-stopped
+    network_mode: host          # 共享 controller 网络栈，打通所有节点路径
+    env_file:
+      - .env
+    volumes:
+      # 挂到代码实际读取的目录：nodes.yaml/presets.yaml 改完只需 restart，DB 也持久化于此
+      - ./backend/app/data:/app/app/data
+      # - ./backend/keys:/app/keys:ro       # 如用密钥认证，取消注释并放置私钥
+    # host 网络下后端端口即 controller:65279（与 backend/Dockerfile 的 --port 一致）
+
+  frontend:
+    build: ./frontend
+    container_name: cp-frontend
+    restart: unless-stopped
+    network_mode: host          # nginx 监听 65278（自定义），反代 127.0.0.1:65279
+    depends_on:
+      - backend
