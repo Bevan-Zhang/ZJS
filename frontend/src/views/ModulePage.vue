@@ -16,6 +16,7 @@ const group = computed(() => (route.meta.group as string) ?? '')
 const presets = computed(() => (route.meta.presets as string[]) ?? [])
 const realRun = computed(() => route.meta.realRun === true) // 真跑代码+控制台
 const bindMain = computed(() => route.meta.bindMain === true) // 所有动效绑定到 模型检测
+const resultFile = computed(() => (route.meta.resultFile as string) ?? '') // 该页只看的结果 CSV
 
 // 脚本运行状态（PresetRunner 真跑 / ScriptButtons 纯展示，都给一个 map）
 const active = ref<Record<string, boolean>>({})
@@ -84,7 +85,7 @@ watch(() => route.path, maybeLoad)
       />
 
       <div style="margin-top: 20px">
-        <DetectionResultPanel />
+        <DetectionResultPanel :file="resultFile" />
       </div>
     </template>
 

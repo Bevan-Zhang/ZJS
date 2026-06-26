@@ -19,16 +19,15 @@ const HIT = '#00e5ff'
 const MISS = '#ff5c7a'
 const TYPE_CAP = 12 // 类型过多时只展示样本量最大的前 N 类，避免拥挤
 
-// 聚合：真实攻击类型 -> { correct, wrong }
+// 聚合：真实攻击类型 -> { correct, wrong }（取后端按全量行算好的 type_dist，避免只看截断样本失真）
 const byType = computed(() => {
   const m = new Map<string, { correct: number; wrong: number }>()
   for (const f of props.files) {
-    for (const s of f.samples) {
-      const key = s.true || '未知'
-      const cur = m.get(key) ?? { correct: 0, wrong: 0 }
-      if (s.correct) cur.correct++
-      else cur.wrong++
-      m.set(key, cur)
+    for (const t of f.type_dist ?? []) {
+      const cur = m.get(t.type) ?? { correct: 0, wrong: 0 }
+      cur.correct += t.correct
+      cur.wrong += t.wrong
+      m.set(t.type, cur)
     }
   }
   return [...m.entries()]
@@ -111,7 +110,7 @@ watch(() => props.files, render, { deep: true })
     <div class="sc-head">
       <span class="sc-bar" />
       <div class="sc-title">攻击类型检出分布</div>
-      <div class="sc-sub">按真实攻击类型聚合逐样本，堆叠展示命中 / 误判</div>
+      <div class="sc-sub">按真实攻击类型对全量样本聚合，堆叠展示命中 / 误判</div>
     </div>
     <div v-if="hasData" ref="el" :style="{ width: '100%', height: props.height ?? '300px' }" />
     <div v-else class="sc-empty">暂无样本数据，先点「查看结果」拉取检测结果。</div>

@@ -47,11 +47,23 @@ export interface DetectionSample {
   confidence?: number | null
   modality?: string | null
 }
+export interface DetectionTypeStat {
+  type: string
+  correct: number
+  wrong: number
+}
+export interface DetectionModalityStat {
+  modality: string
+  total: number
+  correct: number
+}
 export interface DetectionFileStat {
   name: string
   total: number
   correct: number
   accuracy: number
+  type_dist: DetectionTypeStat[]
+  modality_dist: DetectionModalityStat[]
   samples: DetectionSample[]
 }
 export interface DetectionResult {
@@ -184,8 +196,8 @@ export const api = {
     http.post<TaskInfo>(`/api/nodes/${id}/exec`, { command }).then((r) => r.data),
   execScript: (id: string, payload: { filename: string; content: string; remote_dir?: string; run_cmd?: string }) =>
     http.post<TaskInfo>(`/api/nodes/${id}/script`, payload).then((r) => r.data),
-  getDetectionResults: () =>
-    http.get<DetectionResult>('/api/detection/results').then((r) => r.data),
+  getDetectionResults: (file?: string) =>
+    http.get<DetectionResult>('/api/detection/results', { params: file ? { file } : {} }).then((r) => r.data),
   getDetectionRoll: () =>
     http.get<{ total: number; rows: DetectionSample[] }>('/api/detection/roll').then((r) => r.data),
   getTask: (taskId: number) => http.get<TaskInfo>(`/api/tasks/${taskId}`).then((r) => r.data),

@@ -29,7 +29,7 @@ onBeforeUnmount(stop)
   <div class="spot" @mouseenter="stop" @mouseleave="start">
     <div class="spot-head">
       <span class="lbl">样本</span>
-      <span class="counter" v-if="samples.length">{{ idx + 1 }} / {{ samples.length }}</span>
+      <span class="counter" v-if="samples.length">{{ (idx + 1).toLocaleString() }} / {{ samples.length.toLocaleString() }}</span>
     </div>
 
     <transition name="swap" mode="out-in">
