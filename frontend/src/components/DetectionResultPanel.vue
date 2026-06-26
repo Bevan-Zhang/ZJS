@@ -4,6 +4,10 @@ import { ElMessage } from 'element-plus'
 import { api, type DetectionResult } from '../api/client'
 import SampleSpotlight from './SampleSpotlight.vue'
 import DetectionStatsChart from './DetectionStatsChart.vue'
+import ModalityPieChart from './ModalityPieChart.vue'
+
+// file：本页只展示该结果 CSV（如 results_variant.csv）；为空则展示全部
+const props = defineProps<{ file?: string }>()
 
 const loading = ref(false)
 const result = ref<DetectionResult | null>(null)
@@ -11,8 +15,8 @@ const result = ref<DetectionResult | null>(null)
 async function view() {
   loading.value = true
   try {
-    result.value = await api.getDetectionResults()
-    if (result.value.file_count === 0) ElMessage.warning('结果目录暂无 CSV 文件')
+    result.value = await api.getDetectionResults(props.file || undefined)
+    if (result.value.file_count === 0) ElMessage.warning(props.file ? `未找到结果文件：${props.file}` : '结果目录暂无 CSV 文件')
   } catch (e: any) {
     ElMessage.error(e?.response?.data?.detail ?? '读取结果失败')
   } finally {
@@ -30,12 +34,15 @@ async function view() {
           {{ result.file_count }} 个结果文件 · 合计 {{ result.total.toLocaleString() }} 条样本 ·
           总准确率 <b>{{ result.accuracy }}%</b>
         </div>
-        <div v-else class="r-sub">读取 results 目录下的 CSV，按文件展示统计与逐样本明细。</div>
+        <div v-else class="r-sub">{{ file ? '本页绑定 ' + file + '，' : '' }}点「查看结果」展示攻击类型分布、模态分布与逐样本明细。</div>
       </div>
       <el-button type="primary" :loading="loading" @click="view">查看结果</el-button>
     </div>
 
-    <DetectionStatsChart v-if="result && result.file_count" :files="result.files" />
+    <template v-if="result && result.file_count">
+      <DetectionStatsChart :files="result.files" />
+      <ModalityPieChart :files="result.files" />
+    </template>
 
     <div v-for="f in (result?.files ?? [])" :key="f.name" class="file-card">
       <div class="fc-name">

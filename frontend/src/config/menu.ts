@@ -6,6 +6,7 @@ export interface MenuChild {
   presets?: string[] // 该页要展示的预设按钮 id（来自 presets.yaml）
   realRun?: boolean // true=按钮真跑代码并回显输出；否则纯展示触发动效
   bindMain?: boolean // true=所有浮标/链路动效都绑定到「模型检测」运行
+  resultFile?: string // 检测结果页只展示该 CSV（results 目录下文件名）；缺省则展示全部
 }
 
 export interface MenuGroup {
@@ -27,8 +28,8 @@ export const menu: MenuGroup[] = [
     title: '加密恶意流量检测',
     icon: 'DataLine',
     children: [
-      { path: '/traffic/variant', title: '变种威胁检测', desc: '识别已知威胁的变种加密流量', presets: ['netunit1_main'], realRun: true, bindMain: true },
-      { path: '/traffic/unknown', title: '未知攻击检测', desc: '发现未知 / 0day 攻击流量', presets: ['netunit1_main'], realRun: true, bindMain: true },
+      { path: '/traffic/variant', title: '变种威胁检测', desc: '识别已知威胁的变种加密流量', presets: ['netunit1_main'], realRun: true, bindMain: true, resultFile: 'results_variant.csv' },
+      { path: '/traffic/unknown', title: '未知攻击检测', desc: '发现未知 / 0day 攻击流量', presets: ['netunit1_main'], realRun: true, bindMain: true, resultFile: 'results_unknown.csv' },
     ],
   },
   {
