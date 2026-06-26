@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { trace, current, selectThreat } from '../stores/trace'
-import type { TraceThreat } from '../api/client'
+import { computed, onMounted, ref } from 'vue'
+import { trace, current, loadThreats, selectThreat } from '../stores/trace'
 import ThreatBar from '../components/trace/ThreatBar.vue'
+import TraceThreatRoll from '../components/trace/TraceThreatRoll.vue'
 
 const keyword = ref('')
 const attackFilter = ref('')
 const modalityFilter = ref('')
-const tableRef = ref()
-const paused = ref(false)
-let scrollTimer: number | undefined
 
 const sevType = (s?: string) =>
   s === 'high' ? 'danger' : s === 'medium' ? 'warning' : s ? 'info' : 'info'
@@ -35,41 +32,10 @@ const filteredThreats = computed(() => {
     ].some((value) => String(value ?? '').toLowerCase().includes(q))
   })
 })
-const rowClass = ({ row }: { row: TraceThreat }) =>
-  row.threat_id === trace.currentId ? 'cur-row' : ''
-const onRowClick = (row: TraceThreat) => selectThreat(row.threat_id)
 
-const tableBody = () =>
-  tableRef.value?.$el?.querySelector('.el-scrollbar__wrap') as HTMLElement | null
-
-function resetScroll() {
-  nextTick(() => {
-    const body = tableBody()
-    if (body) body.scrollTop = 0
-  })
-}
-
-function startAutoScroll() {
-  stopAutoScroll()
-  scrollTimer = window.setInterval(() => {
-    if (paused.value || trace.loadingThreats) return
-    const body = tableBody()
-    if (!body || body.scrollHeight <= body.clientHeight + 2) return
-    const next = body.scrollTop + 1
-    body.scrollTop = next >= body.scrollHeight - body.clientHeight ? 0 : next
-  }, 55)
-}
-
-function stopAutoScroll() {
-  if (scrollTimer) window.clearInterval(scrollTimer)
-  scrollTimer = undefined
-}
-
-watch([keyword, attackFilter, modalityFilter], resetScroll)
-watch(() => filteredThreats.value.length, resetScroll)
-
-onMounted(startAutoScroll)
-onBeforeUnmount(stopAutoScroll)
+onMounted(() => {
+  if (!trace.threats.length) loadThreats(true)
+})
 </script>
 
 <template>
@@ -86,37 +52,16 @@ onBeforeUnmount(stopAutoScroll)
       <el-select v-model="modalityFilter" clearable placeholder="全部模态">
         <el-option v-for="item in modalityOptions" :key="item" :label="item" :value="item" />
       </el-select>
-      <span class="batch-count">本批 {{ trace.total }} 条，当前匹配 {{ filteredThreats.length }} 条</span>
     </div>
 
     <div class="grid">
-      <div class="tech-panel">
-        <div class="tech-h">
-          威胁列表
-          <span class="cnt">自动滚动展示 {{ filteredThreats.length }} 条，悬停暂停，点击联动分析</span>
-        </div>
-        <el-table
-          ref="tableRef"
-          :data="filteredThreats"
-          size="small"
-          height="620"
+      <div class="tech-panel list-panel">
+        <TraceThreatRoll
           v-loading="trace.loadingThreats"
-          highlight-current-row
-          :row-class-name="rowClass"
-          @row-click="onRowClick"
-          @mouseenter="paused = true"
-          @mouseleave="paused = false"
-          style="background: transparent; cursor: pointer"
-        >
-          <el-table-column prop="threat_id" label="threat_id" min-width="205" show-overflow-tooltip />
-          <el-table-column prop="file_name" label="PCAP 文件" min-width="210" show-overflow-tooltip />
-          <el-table-column prop="attack_type" label="攻击类型" width="115" />
-          <el-table-column prop="stage" label="阶段" width="145" show-overflow-tooltip />
-          <el-table-column prop="modality" label="模态" width="90" />
-          <el-table-column label="置信度" width="90" align="center">
-            <template #default="{ row }">{{ row.ml_confidence ?? '-' }}</template>
-          </el-table-column>
-        </el-table>
+          :rows="filteredThreats"
+          :current-id="trace.currentId"
+          @select="(id) => selectThreat(id)"
+        />
       </div>
 
       <div class="tech-panel">
@@ -149,19 +94,17 @@ onBeforeUnmount(stopAutoScroll)
             <span v-if="!(current()!.stage_evidence?.length)" class="dim">暂无阶段证据</span>
           </div>
         </template>
-        <p v-else class="tech-sub" style="margin: 0">请从左侧选择一条真实威胁记录。</p>
+        <p v-else class="tech-sub" style="margin: 0">请从左侧选择一条威胁记录。</p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.page-title { margin: 0 0 6px; font-size: 26px; color: #eaf6ff; text-shadow: 0 0 16px var(--tech-glow); }
-.page-desc { color: var(--tech-text-dim); margin: 0 0 18px; }
-.filters { display: grid; grid-template-columns: minmax(280px, 1fr) 180px 150px auto; gap: 12px; align-items: center; margin-bottom: 18px; }
-.batch-count { color: var(--tech-text-dim); white-space: nowrap; font-size: 13px; }
+.page-title { margin: 0 0 14px; font-size: 26px; color: #eaf6ff; text-shadow: 0 0 16px var(--tech-glow); }
+.filters { display: grid; grid-template-columns: minmax(280px, 1fr) 180px 150px; gap: 12px; align-items: center; margin-bottom: 18px; }
 .grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.8fr); gap: 18px; }
-.cnt { color: var(--tech-text-dim); font-size: 13px; font-weight: 400; margin-left: 8px; }
+.list-panel { padding: 0; overflow: hidden; }
 .cyan { color: var(--tech-cyan); }
 .kv { margin: 0; }
 .kv > div { display: flex; padding: 8px 0; border-bottom: 1px dashed var(--tech-border); }
@@ -171,9 +114,8 @@ onBeforeUnmount(stopAutoScroll)
 .evidence { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
 .evidence-title { width: 100%; color: var(--tech-text-dim); font-size: 13px; margin-bottom: 2px; }
 .dim { color: var(--tech-text-dim); font-size: 13px; }
-:deep(.cur-row) { background: rgba(0, 229, 255, 0.1) !important; }
 @media (max-width: 1100px) {
-  .filters { grid-template-columns: 1fr 1fr; }
+  .filters { grid-template-columns: 1fr; }
   .grid { grid-template-columns: 1fr; }
 }
 </style>
