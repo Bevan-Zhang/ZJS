@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // 页面3 意图感知：结合局部知识图谱持续感知攻击意图。
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { trace, current, selectThreat } from '../stores/trace'
+import { computed } from 'vue'
+import { trace, current } from '../stores/trace'
 import ThreatBar from '../components/trace/ThreatBar.vue'
 import GraphView from '../components/trace/GraphView.vue'
 
@@ -15,46 +15,12 @@ const highlight = computed(() => {
   return ids
 })
 const capecNodes = computed(() => (g.value?.nodes ?? []).filter((n) => n.type === 'capec'))
-const lastSync = ref('')
-let refreshTimer: number | undefined
-
-const syncLabel = computed(() => lastSync.value || '等待同步')
-
-async function refreshIntentGraph() {
-  if (!trace.currentId) return
-  await selectThreat(trace.currentId)
-  lastSync.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
-}
-
-onMounted(() => {
-  void refreshIntentGraph()
-  refreshTimer = window.setInterval(refreshIntentGraph, 8000)
-})
-
-onBeforeUnmount(() => {
-  if (refreshTimer) window.clearInterval(refreshTimer)
-})
-
-watch(() => trace.loadingDetail, (loading) => {
-  if (!loading && trace.currentId) {
-    lastSync.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
-  }
-})
 </script>
 
 <template>
   <div>
-    <div class="title-row">
-      <div>
-        <h2 class="page-title">意图感知</h2>
-        <p class="page-desc">结合当前威胁命中的局部知识图谱，持续感知攻击意图与战术技术。</p>
-      </div>
-      <div class="live-pill">
-        <span class="pulse" />
-        <span>{{ trace.loadingDetail ? '同步中' : '实时联动' }}</span>
-        <b>{{ syncLabel }}</b>
-      </div>
-    </div>
+    <h2 class="page-title">意图感知</h2>
+    <p class="page-desc">结合当前威胁命中的局部知识图谱，感知攻击意图与战术技术。</p>
 
     <ThreatBar />
 
@@ -71,7 +37,7 @@ watch(() => trace.loadingDetail, (loading) => {
       <!-- 图谱可视化 -->
       <div class="tech-panel">
         <div class="tech-h">意图知识图谱（threat · stage · CAPEC · tactic · technique）</div>
-        <div class="graph-tip">当前 threat 命中节点与战术技术关系实时刷新。</div>
+        <div class="graph-tip">当前 threat 命中节点与战术技术关系。</div>
         <GraphView
           v-if="g && g.nodes.length > 1"
           :nodes="g.nodes"
@@ -120,11 +86,6 @@ watch(() => trace.loadingDetail, (loading) => {
 <style scoped>
 .page-title { margin: 0 0 6px; font-size: 26px; color: #eaf6ff; text-shadow: 0 0 16px var(--tech-glow); }
 .page-desc { color: var(--tech-text-dim); margin: 0 0 18px; }
-.title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
-.live-pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(0,229,255,0.35); border-radius: 999px; padding: 7px 12px; color: var(--tech-text-dim); background: rgba(0,229,255,0.07); font-size: 13px; }
-.live-pill b { color: #eaf6ff; font-family: 'Consolas', monospace; }
-.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--tech-cyan); box-shadow: 0 0 12px var(--tech-cyan); animation: pulse 1.3s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: .45; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.25); } }
 .summary { display: flex; gap: 26px; flex-wrap: wrap; margin-bottom: 18px; }
 .summary span { color: var(--tech-text-dim); font-size: 14px; }
 .summary b { color: #eaf6ff; }
