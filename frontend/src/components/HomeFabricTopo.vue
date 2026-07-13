@@ -37,9 +37,9 @@ const fabricNodes: FabricNode[] = [
 
 const nodeById = Object.fromEntries(fabricNodes.map((node) => [node.id, node]))
 const fabricEdges: [string, string][] = [
-  ['s1', 's3'], ['s1', 's5'], ['s2', 's3'], ['s2', 's5'],
-  ['s3', 's4'], ['s3', 's5'], ['s4', 's6'], ['s5', 's6'],
-  ['s4', 's7'], ['s6', 's7'], ['s4', 's8'], ['s6', 's8'],
+  ['s1', 's5'], ['s2', 's3'], ['s2', 's5'],
+  ['s3', 's5'], ['s4', 's6'], ['s5', 's6'],
+  ['s6', 's7'], ['s4', 's8'], ['s6', 's8'],
 ]
 const backbone: [string, string][] = [['s1', 's3'], ['s3', 's4'], ['s4', 's7']]
 
@@ -69,20 +69,20 @@ const terminals = [
 ]
 
 const overviewCapabilities = [
-  { id: 'traffic', x: 430, y: 72, label: '流量检测', en: 'TRAFFIC', color: '#36f29a', target: 's1', active: true },
-  { id: 'trace', x: 675, y: 58, label: '溯源感知', en: 'TRACE', color: '#ffbf4d', target: 's3', active: true },
-  { id: 'defense', x: 930, y: 72, label: '主动防御', en: 'DEFENSE', color: '#20d8ff', target: 's7', active: true },
+  { id: 'traffic', x: 520, y: 52, label: '流量检测', en: 'TRAFFIC', color: '#36f29a', target: 's1', active: true },
+  { id: 'trace', x: 690, y: 52, label: '溯源感知', en: 'TRACE', color: '#ffbf4d', target: 's3', active: true },
+  { id: 'defense', x: 860, y: 52, label: '主动防御', en: 'DEFENSE', color: '#20d8ff', target: 's7', active: true },
 ]
 
 const capabilities = computed(() => {
   if (props.mode !== 'detection') return overviewCapabilities
   return [
     {
-      id: 'listen', x: 408, y: 72, label: '流量监听', en: 'LISTEN',
+      id: 'listen', x: 480, y: 52, label: '流量监听', en: 'LISTEN',
       color: props.listenOn ? '#4ea3ff' : '#60738d', target: 's1', active: props.listenOn,
     },
     {
-      id: 'detect', x: 510, y: 72, label: '流量检测', en: 'DETECT',
+      id: 'detect', x: 590, y: 52, label: '流量检测', en: 'DETECT',
       color: props.detectOn ? '#36f29a' : '#60738d', target: 's1', active: props.detectOn,
     },
   ]
@@ -122,21 +122,12 @@ const apps = [
             <stop offset=".55" stop-color="#164c68" stop-opacity=".66" />
             <stop offset="1" stop-color="#10213e" stop-opacity=".82" />
           </linearGradient>
-          <linearGradient id="backbone" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#13d9ff" />
-            <stop offset=".55" stop-color="#79efff" />
-            <stop offset="1" stop-color="#26d3ff" />
-          </linearGradient>
           <filter id="cyan-glow" x="-80%" y="-80%" width="260%" height="260%">
             <feGaussianBlur stdDeviation="5" result="blur" />
             <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
           <filter id="soft-shadow" x="-80%" y="-80%" width="260%" height="260%">
             <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#000814" flood-opacity=".72" />
-          </filter>
-          <filter id="attack-glow" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
           <pattern id="micro-grid" width="46" height="46" patternUnits="userSpaceOnUse">
             <path d="M 46 0 L 0 0 0 46" fill="none" stroke="#20d8ff" stroke-opacity=".035" />
@@ -171,26 +162,28 @@ const apps = [
           :style="{ '--cap': cap.color }"
         >
           <path :d="`M ${cap.x} ${cap.y + 54} Q ${cap.x} ${cap.y + 92} ${nodeById[cap.target].x} ${nodeById[cap.target].y - 48}`" class="cap-line" />
-          <circle :cx="cap.x" :cy="cap.y" r="31" class="cap-ring" />
-          <path :d="`M ${cap.x} ${cap.y - 29} C ${cap.x - 22} ${cap.y - 29} ${cap.x - 31} ${cap.y - 12} ${cap.x - 27} ${cap.y + 5} C ${cap.x - 22} ${cap.y + 24} ${cap.x} ${cap.y + 42} ${cap.x} ${cap.y + 42} C ${cap.x} ${cap.y + 42} ${cap.x + 22} ${cap.y + 24} ${cap.x + 27} ${cap.y + 5} C ${cap.x + 31} ${cap.y - 12} ${cap.x + 22} ${cap.y - 29} ${cap.x} ${cap.y - 29} Z`" class="cap-pin" />
-          <g v-if="cap.id === 'traffic' || cap.id === 'detect'" class="cap-glyph">
-            <rect :x="cap.x - 13" :y="cap.y - 10" width="26" height="19" rx="2" />
-            <path :d="`M ${cap.x - 8} ${cap.y + 3} l6 -6 l5 4 l7 -8`" />
+          <g class="cap-visual">
+            <circle :cx="cap.x" :cy="cap.y" r="31" class="cap-ring" />
+            <path :d="`M ${cap.x} ${cap.y - 29} C ${cap.x - 22} ${cap.y - 29} ${cap.x - 31} ${cap.y - 12} ${cap.x - 27} ${cap.y + 5} C ${cap.x - 22} ${cap.y + 24} ${cap.x} ${cap.y + 42} ${cap.x} ${cap.y + 42} C ${cap.x} ${cap.y + 42} ${cap.x + 22} ${cap.y + 24} ${cap.x + 27} ${cap.y + 5} C ${cap.x + 31} ${cap.y - 12} ${cap.x + 22} ${cap.y - 29} ${cap.x} ${cap.y - 29} Z`" class="cap-pin" />
+            <g v-if="cap.id === 'traffic' || cap.id === 'detect'" class="cap-glyph">
+              <rect :x="cap.x - 13" :y="cap.y - 10" width="26" height="19" rx="2" />
+              <path :d="`M ${cap.x - 8} ${cap.y + 3} l6 -6 l5 4 l7 -8`" />
+            </g>
+            <g v-else-if="cap.id === 'listen'" class="cap-glyph">
+              <path :d="`M ${cap.x - 17} ${cap.y} Q ${cap.x} ${cap.y - 15} ${cap.x + 17} ${cap.y} Q ${cap.x} ${cap.y + 15} ${cap.x - 17} ${cap.y} Z`" />
+              <circle :cx="cap.x" :cy="cap.y" r="5" />
+            </g>
+            <g v-else-if="cap.id === 'trace'" class="cap-glyph">
+              <circle :cx="cap.x" :cy="cap.y" r="12" />
+              <path :d="`M ${cap.x - 16} ${cap.y} H ${cap.x + 16} M ${cap.x} ${cap.y - 16} V ${cap.y + 16}`" />
+            </g>
+            <g v-else class="cap-glyph">
+              <rect :x="cap.x - 11" :y="cap.y - 7" width="22" height="20" rx="3" />
+              <path :d="`M ${cap.x - 7} ${cap.y - 7} V ${cap.y - 13} A 7 7 0 0 1 ${cap.x + 7} ${cap.y - 13} V ${cap.y - 7}`" />
+            </g>
           </g>
-          <g v-else-if="cap.id === 'listen'" class="cap-glyph">
-            <path :d="`M ${cap.x - 17} ${cap.y} Q ${cap.x} ${cap.y - 15} ${cap.x + 17} ${cap.y} Q ${cap.x} ${cap.y + 15} ${cap.x - 17} ${cap.y} Z`" />
-            <circle :cx="cap.x" :cy="cap.y" r="5" />
-          </g>
-          <g v-else-if="cap.id === 'trace'" class="cap-glyph">
-            <circle :cx="cap.x" :cy="cap.y" r="12" />
-            <path :d="`M ${cap.x - 16} ${cap.y} H ${cap.x + 16} M ${cap.x} ${cap.y - 16} V ${cap.y + 16}`" />
-          </g>
-          <g v-else class="cap-glyph">
-            <rect :x="cap.x - 11" :y="cap.y - 7" width="22" height="20" rx="3" />
-            <path :d="`M ${cap.x - 7} ${cap.y - 7} V ${cap.y - 13} A 7 7 0 0 1 ${cap.x + 7} ${cap.y - 13} V ${cap.y - 7}`" />
-          </g>
-          <text :x="cap.x" :y="cap.y + 70" class="cap-label">{{ cap.label }}</text>
-          <text :x="cap.x" :y="cap.y + 86" class="cap-en">{{ cap.en }}</text>
+          <text :x="cap.x" :y="cap.y + 61" class="cap-label">{{ cap.label }}</text>
+          <text :x="cap.x" :y="cap.y + 75" class="cap-en">{{ cap.en }}</text>
         </g>
 
         <!-- User terminals and access gateways -->
@@ -216,7 +209,7 @@ const apps = [
             </g>
             <text x="110" :y="terminal.y + 60" class="terminal-label">{{ terminal.label }}</text>
 
-            <g class="access-gateway" :transform="`translate(246 ${terminal.y})`">
+            <g class="access-gateway" :transform="`translate(246 ${terminal.y}) scale(.84)`">
               <ellipse cy="25" rx="34" ry="10" class="gateway-platform" />
               <rect x="-36" y="-16" width="72" height="30" rx="8" class="gateway-body" />
               <ellipse cy="-16" rx="36" ry="15" class="gateway-top" />
@@ -252,7 +245,7 @@ const apps = [
         </g>
 
         <!-- Fabric devices -->
-        <g v-for="node in fabricNodes" :key="node.id" class="router" :class="nodeState(node)" :transform="`translate(${node.x} ${node.y})`">
+        <g v-for="node in fabricNodes" :key="node.id" class="router" :class="nodeState(node)" :transform="`translate(${node.x} ${node.y}) scale(.82)`">
           <ellipse cy="42" :rx="node.edge ? 42 : 46" ry="14" class="router-ring" />
           <ellipse cy="16" :rx="node.edge ? 38 : 42" ry="18" class="router-side" />
           <rect :x="node.edge ? -38 : -42" y="-14" :width="node.edge ? 76 : 84" height="30" class="router-body" />
@@ -273,7 +266,7 @@ const apps = [
           <text x="1292" y="150" class="service-role">服务侧</text>
           <text x="1292" y="176" class="service-title">应用服务集群</text>
           <path d="M 924 224 C 1000 224 1035 282 1080 282 M 924 224 C 1000 260 1035 382 1080 382 M 924 546 C 1000 546 1035 482 1080 482" class="service-bus" />
-          <g v-for="(y, i) in [282, 382, 482]" :key="y" :transform="`translate(1118 ${y})`" class="service-gateway">
+          <g v-for="(y, i) in [282, 382, 482]" :key="y" :transform="`translate(1118 ${y}) scale(.84)`" class="service-gateway">
             <ellipse cy="25" rx="36" ry="10" class="service-platform" />
             <rect x="-39" y="-18" width="78" height="32" rx="8" class="service-gateway-body" />
             <ellipse cy="-18" rx="39" ry="16" class="service-gateway-top" />
@@ -282,7 +275,7 @@ const apps = [
             <path :d="`M 40 -6 C 62 ${i === 1 ? -6 : i === 0 ? 8 : -18}, 66 ${i === 1 ? 0 : i === 0 ? 24 : -8}, 76 ${i === 1 ? 0 : i === 0 ? 24 : -8}`" class="service-ingress" />
           </g>
 
-          <g v-for="app in apps" :key="app.id" class="app-node" :style="{ '--app': app.color }" :transform="`translate(${app.x} ${app.y})`">
+          <g v-for="app in apps" :key="app.id" class="app-node" :style="{ '--app': app.color }" :transform="`translate(${app.x} ${app.y}) scale(.84)`">
             <ellipse cy="50" rx="40" ry="12" class="app-platform" />
             <polygon points="-28,-35 17,-35 31,-45 -14,-45" class="app-top" />
             <polygon points="17,-35 31,-45 31,24 17,34" class="app-side" />
@@ -310,17 +303,6 @@ const apps = [
           </g>
         </g>
 
-        <!-- Attack source -->
-        <g class="attack">
-          <path d="M 1006 581 C 978 545 950 506 910 477 M 1006 581 C 955 552 878 514 798 478 M 1006 581 C 930 584 786 558 646 496" class="attack-rays" />
-          <ellipse cx="1006" cy="646" rx="62" ry="20" class="attack-platform" />
-          <polygon points="1006,548 1054,574 1042,626 1006,650 970,626 958,574" class="attack-body" />
-          <polygon points="1006,530 1038,558 974,558" class="attack-warning" />
-          <path d="M 1006 537 V 548 M 1006 552 V 554" class="attack-mark" />
-          <path d="M 987 587 H 1025 M 996 573 L 1016 603 M 1016 573 L 996 603" class="attack-circuit" />
-          <circle cx="1036" cy="574" r="4" class="attack-dot" />
-          <text x="1006" y="516" class="attack-label">攻击源</text>
-        </g>
       </svg>
     </div>
   </section>
@@ -342,12 +324,13 @@ const apps = [
 .capability { color: var(--cap); }
 .capability.inactive { opacity: .64; }
 .capability.inactive .cap-ring { filter: none; animation: none; }
+.cap-visual { transform: scale(.72); transform-box: fill-box; transform-origin: center; }
 .cap-line { fill: none; stroke: var(--cap); stroke-opacity: .52; stroke-width: 1.5; stroke-dasharray: 6 9; }
 .cap-ring { fill: rgba(7, 20, 38, .9); stroke: var(--cap); stroke-width: 2; stroke-dasharray: 7 5; filter: url(#cyan-glow); animation: ring-spin 8s linear infinite; transform-box: fill-box; transform-origin: center; }
 .cap-pin { fill: rgba(5, 22, 38, .94); stroke: var(--cap); stroke-width: 2.3; filter: url(#cyan-glow); }
 .cap-glyph * { fill: none; stroke: #d8fbff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.cap-label { fill: #e8f1ff; text-anchor: middle; font-size: 15px; font-weight: 900; }
-.cap-en { fill: var(--cap); text-anchor: middle; font-size: 9px; font-weight: 900; letter-spacing: 1.4px; }
+.cap-label { fill: #e8f1ff; text-anchor: middle; font-size: 13px; font-weight: 900; }
+.cap-en { fill: var(--cap); text-anchor: middle; font-size: 8px; font-weight: 900; letter-spacing: 1.2px; }
 @keyframes ring-spin { to { transform: rotate(360deg); } }
 
 .terminal-bus, .terminal-link { fill: none; stroke: rgba(32, 216, 255, .32); stroke-width: 1.6; }
@@ -370,7 +353,7 @@ const apps = [
 .fabric-label { fill: #a7c7df; font-size: 12px; font-weight: 800; text-anchor: middle; }
 .mesh-link { fill: none; stroke: rgba(142, 208, 233, .38); stroke-width: 1.7; }
 .backbone-shadow { fill: none; stroke: #20d8ff; stroke-width: 15; opacity: .18; filter: url(#cyan-glow); }
-.backbone-line { fill: none; stroke: url(#backbone); stroke-width: 6; stroke-linecap: round; filter: url(#cyan-glow); }
+.backbone-line { fill: none; stroke: #32ddff; stroke-width: 6; stroke-linecap: round; filter: url(#cyan-glow); }
 .backbone-stream { fill: none; stroke: #e8fcff; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 2 18; animation: dash 1.2s linear infinite; }
 .detection-flow-shadow { fill: none; stroke: #20d8ff; stroke-width: 16; opacity: .2; filter: url(#cyan-glow); }
 .detection-flow-line { fill: none; stroke: #d8fbff; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 3 15; filter: url(#cyan-glow); animation: dash .95s linear infinite; }
@@ -404,14 +387,6 @@ const apps = [
 .app-icon * { fill: none; stroke: #d8fbff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .app-icon .icon-dot { fill: #d8fbff; }
 .app-label { fill: #dce8ff; font-size: 11px; font-weight: 800; text-anchor: middle; }
-
-.attack-rays { fill: none; stroke: #ff743c; stroke-width: 2.2; stroke-dasharray: 8 8; opacity: .72; animation: dash 3.6s linear infinite; }
-.attack-platform { fill: rgba(255, 107, 53, .1); stroke: #ff9866; filter: url(#attack-glow); }
-.attack-body { fill: rgba(255, 107, 53, .34); stroke: #ffb58a; stroke-width: 2; filter: url(#attack-glow); }
-.attack-warning { fill: rgba(255, 90, 103, .78); stroke: #ffe2da; stroke-width: 1.5; filter: url(#attack-glow); }
-.attack-mark, .attack-circuit { fill: none; stroke: #fff5eb; stroke-width: 3; stroke-linecap: round; }
-.attack-dot { fill: #ffdcbf; filter: url(#attack-glow); }
-.attack-label { fill: #fff2e8; font-size: 19px; font-weight: 900; text-anchor: middle; filter: url(#attack-glow); }
 
 @media (max-width: 1100px) {
   .fabric-svg { min-height: 430px; }

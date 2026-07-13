@@ -28,7 +28,7 @@ export const menu: MenuGroup[] = [
     icon: 'DataLine',
     children: [
       { path: '/traffic/variant', title: '变种威胁检测', desc: '识别已知威胁的变种加密流量', presets: ['netunit1_main'], realRun: true, bindMain: true },
-      { path: '/traffic/unknown', title: '未知攻击检测', desc: '发现未知 / 0day 攻击流量', presets: ['netunit1_main'], realRun: true, bindMain: true },
+      { path: '/traffic/unknown', title: '特征未知流量检测', desc: '识别特征空间未知的加密流量', presets: ['netunit1_main'], realRun: true, bindMain: true },
     ],
   },
   {
