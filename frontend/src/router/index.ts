@@ -35,7 +35,6 @@ for (const group of menu) {
       meta: {
         title: child.title, desc: child.desc, group: group.title,
         presets: child.presets ?? [], realRun: child.realRun ?? false, bindMain: child.bindMain ?? false,
-        resultFile: child.resultFile ?? '',
       },
     })
   }

@@ -1,0 +1,338 @@
+{
+  "total": 37,
+  "rows": [
+    {
+      "name": "mpls_DoS_Slowloris_853.pcap",
+      "modality": "mpls",
+      "true": "DoS",
+      "technique": "Slowloris",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9885
+    },
+    {
+      "name": "mpls_Infiltration_Dropbox_1975.pcap",
+      "modality": "mpls",
+      "true": "Infiltration",
+      "technique": "Dropbox",
+      "pred": "Infiltration",
+      "correct": true,
+      "confidence": 0.9359
+    },
+    {
+      "name": "ipv6_Infiltration_NMAP-Portscan_1170.pcap",
+      "modality": "ipv6",
+      "true": "Infiltration",
+      "technique": "NMAP-Portscan",
+      "pred": "Infiltration",
+      "correct": true,
+      "confidence": 0.957
+    },
+    {
+      "name": "ipv6_BruteForce_SSH-Patator_3466.pcap",
+      "modality": "ipv6",
+      "true": "BruteForce",
+      "technique": "SSH-Patator",
+      "pred": "BruteForce",
+      "correct": true,
+      "confidence": 0.9584
+    },
+    {
+      "name": "mpls_Benign_9100.pcap",
+      "modality": "mpls",
+      "true": "Benign",
+      "technique": null,
+      "pred": "Benign",
+      "correct": true,
+      "confidence": 0.9606
+    },
+    {
+      "name": "ipv6_Botnet_Ares_2058.pcap",
+      "modality": "ipv6",
+      "true": "Botnet",
+      "technique": "Ares",
+      "pred": "Botnet",
+      "correct": true,
+      "confidence": 0.9022
+    },
+    {
+      "name": "mpls_DDoS_LOIC-UDP_950.pcap",
+      "modality": "mpls",
+      "true": "DDoS",
+      "technique": "LOIC-UDP",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9839
+    },
+    {
+      "name": "mpls_DoS_Hulk_5362.pcap",
+      "modality": "mpls",
+      "true": "DoS",
+      "technique": "Hulk",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9903
+    },
+    {
+      "name": "mpls_Infiltration_NMAP-Portscan_4921.pcap",
+      "modality": "mpls",
+      "true": "Infiltration",
+      "technique": "NMAP-Portscan",
+      "pred": "Infiltration",
+      "correct": true,
+      "confidence": 0.9446
+    },
+    {
+      "name": "mpls_Infiltration_NMAP-Portscan_3666.pcap",
+      "modality": "mpls",
+      "true": "Infiltration",
+      "technique": "NMAP-Portscan",
+      "pred": "Infiltration",
+      "correct": true,
+      "confidence": 0.9738
+    },
+    {
+      "name": "DDoS_HOIC_2766.pcap",
+      "modality": "IPv4",
+      "true": "DDoS",
+      "technique": "HOIC",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9926
+    },
+    {
+      "name": "Infiltration_NMAP-Portscan_681.pcap",
+      "modality": "IPv4",
+      "true": "Infiltration",
+      "technique": "NMAP-Portscan",
+      "pred": "Benign",
+      "correct": false,
+      "confidence": 0.7251
+    },
+    {
+      "name": "geo_DoS_GoldenEye_16363.pcap",
+      "modality": "geo",
+      "true": "DoS",
+      "technique": "GoldenEye",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9948
+    },
+    {
+      "name": "ipv6_Botnet_Screenshots_503.pcap",
+      "modality": "ipv6",
+      "true": "Botnet",
+      "technique": "Screenshots",
+      "pred": "Botnet",
+      "correct": true,
+      "confidence": 0.9123
+    },
+    {
+      "name": "mpls_DoS_Slowloris_1128.pcap",
+      "modality": "mpls",
+      "true": "DoS",
+      "technique": "Slowloris",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9947
+    },
+    {
+      "name": "mpls_DoS_Slowloris_3946.pcap",
+      "modality": "mpls",
+      "true": "DoS",
+      "technique": "Slowloris",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9818
+    },
+    {
+      "name": "geo_DDoS_LOIC-UDP_2200.pcap",
+      "modality": "geo",
+      "true": "DDoS",
+      "technique": "LOIC-UDP",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9823
+    },
+    {
+      "name": "Benign_7794.pcap",
+      "modality": "IPv4",
+      "true": "Benign",
+      "technique": null,
+      "pred": "Benign",
+      "correct": true,
+      "confidence": 0.9616
+    },
+    {
+      "name": "DDoS_HOIC_4876.pcap",
+      "modality": "IPv4",
+      "true": "DDoS",
+      "technique": "HOIC",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9745
+    },
+    {
+      "name": "scion_Botnet_Screenshots_2838.pcap",
+      "modality": "scion",
+      "true": "Botnet",
+      "technique": "Screenshots",
+      "pred": "Benign",
+      "correct": false,
+      "confidence": 0.5617
+    },
+    {
+      "name": "ipv6_DoS_GoldenEye_22148.pcap",
+      "modality": "ipv6",
+      "true": "DoS",
+      "technique": "GoldenEye",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9672
+    },
+    {
+      "name": "Benign_9425.pcap",
+      "modality": "IPv4",
+      "true": "Benign",
+      "technique": null,
+      "pred": "Benign",
+      "correct": true,
+      "confidence": 0.9765
+    },
+    {
+      "name": "DDoS_HOIC_68.pcap",
+      "modality": "IPv4",
+      "true": "DDoS",
+      "technique": "HOIC",
+      "pred": "Benign",
+      "correct": false,
+      "confidence": 0.8712
+    },
+    {
+      "name": "ipv6_DoS_GoldenEye_27112.pcap",
+      "modality": "ipv6",
+      "true": "DoS",
+      "technique": "GoldenEye",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9947
+    },
+    {
+      "name": "mpls_Infiltration_NMAP-Portscan_2342.pcap",
+      "modality": "mpls",
+      "true": "Infiltration",
+      "technique": "NMAP-Portscan",
+      "pred": "Infiltration",
+      "correct": true,
+      "confidence": 0.9734
+    },
+    {
+      "name": "scion_Botnet_Screenshots_3115.pcap",
+      "modality": "scion",
+      "true": "Botnet",
+      "technique": "Screenshots",
+      "pred": "Botnet",
+      "correct": true,
+      "confidence": 0.9151
+    },
+    {
+      "name": "scion_Botnet_Ares_2079.pcap",
+      "modality": "scion",
+      "true": "Botnet",
+      "technique": "Ares",
+      "pred": "Botnet",
+      "correct": true,
+      "confidence": 0.9022
+    },
+    {
+      "name": "Infiltration_Dropbox_895.pcap",
+      "modality": "IPv4",
+      "true": "Infiltration",
+      "technique": "Dropbox",
+      "pred": "Benign",
+      "correct": false,
+      "confidence": 0.7969
+    },
+    {
+      "name": "ipv6_Botnet_Screenshots_2447.pcap",
+      "modality": "ipv6",
+      "true": "Botnet",
+      "technique": "Screenshots",
+      "pred": "Botnet",
+      "correct": true,
+      "confidence": 0.9333
+    },
+    {
+      "name": "BruteForce_FTP-Patator_900.pcap",
+      "modality": "IPv4",
+      "true": "BruteForce",
+      "technique": "FTP-Patator",
+      "pred": "BruteForce",
+      "correct": true,
+      "confidence": 0.9752
+    },
+    {
+      "name": "ipv6_DDoS_LOIC-UDP_1419.pcap",
+      "modality": "ipv6",
+      "true": "DDoS",
+      "technique": "LOIC-UDP",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9825
+    },
+    {
+      "name": "Benign_10745.pcap",
+      "modality": "IPv4",
+      "true": "Benign",
+      "technique": null,
+      "pred": "Benign",
+      "correct": true,
+      "confidence": 0.9722
+    },
+    {
+      "name": "mpls_DoS_Slowloris_3327.pcap",
+      "modality": "mpls",
+      "true": "DoS",
+      "technique": "Slowloris",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.993
+    },
+    {
+      "name": "ipv6_Benign_28329.pcap",
+      "modality": "ipv6",
+      "true": "Benign",
+      "technique": null,
+      "pred": "Benign",
+      "correct": true,
+      "confidence": 0.8072
+    },
+    {
+      "name": "DoS_GoldenEye_2786.pcap",
+      "modality": "IPv4",
+      "true": "DoS",
+      "technique": "GoldenEye",
+      "pred": "DoS/DDoS",
+      "correct": true,
+      "confidence": 0.9818
+    },
+    {
+      "name": "mpls_Benign_5043.pcap",
+      "modality": "mpls",
+      "true": "Benign",
+      "technique": null,
+      "pred": "Benign",
+      "correct": true,
+      "confidence": 0.9742
+    },
+    {
+      "name": "scion_Infiltration_Dropbox_196.pcap",
+      "modality": "scion",
+      "true": "Infiltration",
+      "technique": "Dropbox",
+      "pred": "Benign",
+      "correct": false,
+      "confidence": 0.7991
+    }
+  ]
+}

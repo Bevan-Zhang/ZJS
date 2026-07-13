@@ -25,8 +25,8 @@ const malFlows = computed(() => (dash.value?.intrusion?.malicious_flows as any[]
 
 <template>
   <div class="page">
-    <h2 class="title">拟态入侵检测</h2>
-    <DefenseControl name="拟态入侵检测" :strategy="STRATEGY" node="网元 s1（入口）" ip="192.168.1.2"
+    <h2 class="title">多模协同入侵检测</h2>
+    <DefenseControl name="多模协同入侵检测" :strategy="STRATEGY" node="网元 s1（入口）" ip="192.168.1.2"
       :running="running" :online="online" @changed="refresh" />
 
     <div class="cols">

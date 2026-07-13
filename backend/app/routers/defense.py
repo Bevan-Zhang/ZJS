@@ -19,7 +19,7 @@ router = APIRouter(prefix="/api/defense", tags=["defense"])
 BASE = os.getenv("DEFENSE_API_BASE", "http://127.0.0.1:8000").rstrip("/")
 TIMEOUT = float(os.getenv("DEFENSE_API_TIMEOUT", "15"))
 START_TIMEOUT = float(os.getenv("DEFENSE_START_TIMEOUT", "660"))  # 启停操作超时
-DASHBOARD_TIMEOUT = float(os.getenv("DEFENSE_DASHBOARD_TIMEOUT", "120"))  # dashboard 含 SSH 采集，首次较慢
+DASHBOARD_TIMEOUT = float(os.getenv("DEFENSE_DASHBOARD_TIMEOUT", "30"))  # cat status.json 很快，无需120s
 
 
 def _get(path: str, timeout: float = TIMEOUT):
@@ -46,14 +46,16 @@ def _post(path: str, body: dict, timeout: float = TIMEOUT):
 
 # ---- mock 数据（Controller 不可达时的兜底，供前端 UI 调试）----
 def _mock_dashboard():
+    """Controller 不可达时的 mock 兜底，格式与 controller_server_v2 /defense/dashboard 一致"""
     return {
-        "controller": "mock (offline)",
+        "status": "mock",
+        "path": "host1 → s1 → s3 → s4 → s7 → server1",
         "mimetic_status": {
-            "mimetic_intrusion_detection": {"running": False, "status": "stopped"},
-            "mimetic_adaptive_defense": {"running": False, "status": "stopped"},
-            "mimetic_honeypot": {"running": False, "status": "stopped"},
+            "mimetic_intrusion_detection": {"display_name": "多模协同入侵检测", "deploy_switch": 1, "ssh_host": "192.168.1.2", "running": False},
+            "mimetic_adaptive_defense":   {"display_name": "拟态防御",         "deploy_switch": 4, "ssh_host": "192.168.4.2", "running": False},
+            "mimetic_honeypot":           {"display_name": "跨膜态诱捕蜜罐",     "deploy_switch": 7, "ssh_host": "192.168.7.2", "running": False},
         },
-        # --- 拟态入侵检测 ---
+        # --- 多模协同入侵检测 ---
         "intrusion": {
             "models": [
                 {"id": 1, "name": "CNN", "desc": "卷积特征提取", "active": True},
@@ -72,7 +74,7 @@ def _mock_dashboard():
                 {"id": 8, "time": "14:32:50", "src": "10.0.4.17", "dst": "192.168.1.2", "type": "HTTP C2",    "verdict": "恶意"},
             ],
         },
-        # --- 拟态自适应防御 ---
+        # --- 拟态防御 ---
         "adaptive": {
             "executors": [
                 {"id": 1, "name": "REMI-AIA",      "type": "optimized",   "online": True,  "desc": "免疫优化代理 (s4:8080)"},
@@ -86,7 +88,7 @@ def _mock_dashboard():
             "success_rate": 87.3,
             "rate_history": [82.4, 83.1, 79.8, 85.2, 86.7, 84.9, 87.3],
         },
-        # --- 拟态蜜罐 ---
+        # --- 跨膜态诱捕蜜罐 ---
         "honeypot": {
             "trap_rate": 73.6,
             "attack_stats": [
@@ -108,7 +110,7 @@ def _mock_dashboard():
                 "1": {"strategy_name": "traffic_ctrl",     "display_name": "流量控制", "category": "traditional", "deploy_location": "网元1 (192.168.1.2)",  "utility": 0.643},
                 "3": {"strategy_name": "rate_limit",      "display_name": "速率限制", "category": "traditional", "deploy_location": "网元3 (192.168.3.2)",  "utility": 0.639},
                 "4": {"strategy_name": "load_balance",     "display_name": "负载均衡", "category": "traditional", "deploy_location": "网元4 (192.168.4.2)",  "utility": 0.623},
-                "7": {"strategy_name": "mimetic_honeypot", "display_name": "拟态蜜罐", "category": "mimetic",     "deploy_location": "网元7 (192.168.7.2)",  "utility": 0.478},
+                "7": {"strategy_name": "mimetic_honeypot", "display_name": "跨膜态诱捕蜜罐", "category": "mimetic",     "deploy_location": "网元7 (192.168.7.2)",  "utility": 0.478},
             },
         },
         "attack_summary": {

@@ -31,9 +31,9 @@ const STRATEGIES = [
   { name: '速率限制', cat: '传统', node: 's7' },
   { name: '流量控制', cat: '传统', node: 's1,s3,s4,s7' },
   { name: '负载均衡', cat: '传统', node: 's1,s3,s4,s7' },
-  { name: '拟态蜜罐', cat: '拟态', node: 's7', key: 'mimetic_honeypot' },
-  { name: '拟态入侵检测', cat: '拟态', node: 's1', key: 'mimetic_intrusion_detection' },
-  { name: '拟态自适应防御', cat: '拟态', node: 's4', key: 'mimetic_adaptive_defense' },
+  { name: '跨膜态诱捕蜜罐', cat: '拟态', node: 's7', key: 'mimetic_honeypot' },
+  { name: '多模协同入侵检测', cat: '拟态', node: 's1', key: 'mimetic_intrusion_detection' },
+  { name: '拟态防御', cat: '拟态', node: 's4', key: 'mimetic_adaptive_defense' },
 ]
 function stratOn(s: any): boolean | undefined {
   if (!s.key) return undefined

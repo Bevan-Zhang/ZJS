@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { api, type NodeInfo } from '../api/client'
-import HomeTopo from '../components/HomeTopo.vue'
+import HomeFabricTopo from '../components/HomeFabricTopo.vue'
 
 const nodes = ref<NodeInfo[]>([])
 const probing = ref(false)
@@ -39,6 +39,6 @@ onMounted(load)
 </script>
 
 <template>
-  <!-- 首页只保留网络拓扑 -->
-  <HomeTopo :nodes="nodes" :probing="probing" @probe="probeAll" />
+  <!-- 首页使用多模态 Spine–Leaf 拓扑；检测页仍保留原 HomeTopo 联动视图 -->
+  <HomeFabricTopo :nodes="nodes" :probing="probing" @probe="probeAll" />
 </template>

@@ -26,8 +26,8 @@ function barWidth(c: number) { return `${(c / maxCount.value) * 100}%` }
 
 <template>
   <div class="page">
-    <h2 class="title">拟态蜜罐</h2>
-    <DefenseControl name="拟态蜜罐" :strategy="STRATEGY" node="网元 s7（出口）" ip="192.168.7.2"
+    <h2 class="title">跨膜态诱捕蜜罐</h2>
+    <DefenseControl name="跨膜态诱捕蜜罐" :strategy="STRATEGY" node="网元 s7（出口）" ip="192.168.7.2"
       :running="running" :online="online" @changed="refresh" />
 
     <div class="cols">

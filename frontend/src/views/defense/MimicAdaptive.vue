@@ -102,8 +102,8 @@ const visibleXLabels = computed(() => {
 
 <template>
   <div class="page">
-    <h2 class="title">拟态自适应防御</h2>
-    <DefenseControl name="拟态自适应防御 (REMI-AIA)" :strategy="STRATEGY" node="网元 s4（中间）" ip="192.168.4.2"
+    <h2 class="title">拟态防御</h2>
+    <DefenseControl name="拟态防御 (REMI-AIA)" :strategy="STRATEGY" node="网元 s4（中间）" ip="192.168.4.2"
       :running="running" :online="online" @changed="refresh" />
 
     <div class="cols">
