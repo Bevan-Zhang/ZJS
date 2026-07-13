@@ -2,7 +2,17 @@
 import { computed } from 'vue'
 import type { NodeInfo } from '../api/client'
 
-const props = defineProps<{ nodes: NodeInfo[]; probing?: boolean }>()
+const props = withDefaults(
+  defineProps<{
+    nodes: NodeInfo[]
+    probing?: boolean
+    mode?: 'overview' | 'detection'
+    linkFlow?: boolean
+    listenOn?: boolean
+    detectOn?: boolean
+  }>(),
+  { mode: 'overview' },
+)
 const emit = defineEmits<{ (e: 'probe'): void }>()
 
 type FabricNode = {
@@ -58,11 +68,28 @@ const terminals = [
   { y: 550, type: 'desktop', label: '工作站', target: 's2' },
 ]
 
-const capabilities = [
-  { id: 'traffic', x: 430, y: 72, label: '流量检测', en: 'TRAFFIC', color: '#36f29a', target: 's1' },
-  { id: 'trace', x: 675, y: 58, label: '溯源感知', en: 'TRACE', color: '#ffbf4d', target: 's3' },
-  { id: 'defense', x: 930, y: 72, label: '主动防御', en: 'DEFENSE', color: '#20d8ff', target: 's7' },
+const overviewCapabilities = [
+  { id: 'traffic', x: 430, y: 72, label: '流量检测', en: 'TRAFFIC', color: '#36f29a', target: 's1', active: true },
+  { id: 'trace', x: 675, y: 58, label: '溯源感知', en: 'TRACE', color: '#ffbf4d', target: 's3', active: true },
+  { id: 'defense', x: 930, y: 72, label: '主动防御', en: 'DEFENSE', color: '#20d8ff', target: 's7', active: true },
 ]
+
+const capabilities = computed(() => {
+  if (props.mode !== 'detection') return overviewCapabilities
+  return [
+    {
+      id: 'listen', x: 408, y: 72, label: '流量监听', en: 'LISTEN',
+      color: props.listenOn ? '#4ea3ff' : '#60738d', target: 's1', active: props.listenOn,
+    },
+    {
+      id: 'detect', x: 510, y: 72, label: '流量检测', en: 'DETECT',
+      color: props.detectOn ? '#36f29a' : '#60738d', target: 's1', active: props.detectOn,
+    },
+  ]
+})
+
+const detectionFlowPath =
+  'M 278 392 C 335 392 376 250 454 224 L 578 322 L 758 322 L 882 224 C 968 224 1022 282 1080 282'
 
 const apps = [
   { id: 'chat', x: 1234, y: 292, label: '智能对话', color: '#20d8ff' },
@@ -138,13 +165,21 @@ const apps = [
         </g>
 
         <!-- Capability pins -->
-        <g v-for="cap in capabilities" :key="cap.id" class="capability" :style="{ '--cap': cap.color }">
+        <g
+          v-for="cap in capabilities" :key="cap.id" class="capability"
+          :class="[{ inactive: mode === 'detection' && !cap.active }, `cap-${cap.id}`]"
+          :style="{ '--cap': cap.color }"
+        >
           <path :d="`M ${cap.x} ${cap.y + 54} Q ${cap.x} ${cap.y + 92} ${nodeById[cap.target].x} ${nodeById[cap.target].y - 48}`" class="cap-line" />
           <circle :cx="cap.x" :cy="cap.y" r="31" class="cap-ring" />
           <path :d="`M ${cap.x} ${cap.y - 29} C ${cap.x - 22} ${cap.y - 29} ${cap.x - 31} ${cap.y - 12} ${cap.x - 27} ${cap.y + 5} C ${cap.x - 22} ${cap.y + 24} ${cap.x} ${cap.y + 42} ${cap.x} ${cap.y + 42} C ${cap.x} ${cap.y + 42} ${cap.x + 22} ${cap.y + 24} ${cap.x + 27} ${cap.y + 5} C ${cap.x + 31} ${cap.y - 12} ${cap.x + 22} ${cap.y - 29} ${cap.x} ${cap.y - 29} Z`" class="cap-pin" />
-          <g v-if="cap.id === 'traffic'" class="cap-glyph">
+          <g v-if="cap.id === 'traffic' || cap.id === 'detect'" class="cap-glyph">
             <rect :x="cap.x - 13" :y="cap.y - 10" width="26" height="19" rx="2" />
             <path :d="`M ${cap.x - 8} ${cap.y + 3} l6 -6 l5 4 l7 -8`" />
+          </g>
+          <g v-else-if="cap.id === 'listen'" class="cap-glyph">
+            <path :d="`M ${cap.x - 17} ${cap.y} Q ${cap.x} ${cap.y - 15} ${cap.x + 17} ${cap.y} Q ${cap.x} ${cap.y + 15} ${cap.x - 17} ${cap.y} Z`" />
+            <circle :cx="cap.x" :cy="cap.y" r="5" />
           </g>
           <g v-else-if="cap.id === 'trace'" class="cap-glyph">
             <circle :cx="cap.x" :cy="cap.y" r="12" />
@@ -206,6 +241,13 @@ const apps = [
             <path :d="edgePath(edge)" class="backbone-shadow" />
             <path :d="edgePath(edge)" class="backbone-line" />
             <path :d="edgePath(edge)" class="backbone-stream" />
+          </g>
+          <g v-if="mode === 'detection' && linkFlow" class="detection-flow-layer">
+            <path :d="detectionFlowPath" class="detection-flow-shadow" />
+            <path :d="detectionFlowPath" class="detection-flow-line" />
+            <circle v-for="i in 7" :key="`packet-${i}`" r="4" class="detection-packet">
+              <animateMotion :path="detectionFlowPath" dur="2.8s" :begin="`${(i - 1) * 0.38}s`" repeatCount="indefinite" />
+            </circle>
           </g>
         </g>
 
@@ -298,6 +340,8 @@ const apps = [
 .zone-en { fill: #7f9fc7; font-size: 10px; font-weight: 800; letter-spacing: .5px; }
 
 .capability { color: var(--cap); }
+.capability.inactive { opacity: .64; }
+.capability.inactive .cap-ring { filter: none; animation: none; }
 .cap-line { fill: none; stroke: var(--cap); stroke-opacity: .52; stroke-width: 1.5; stroke-dasharray: 6 9; }
 .cap-ring { fill: rgba(7, 20, 38, .9); stroke: var(--cap); stroke-width: 2; stroke-dasharray: 7 5; filter: url(#cyan-glow); animation: ring-spin 8s linear infinite; transform-box: fill-box; transform-origin: center; }
 .cap-pin { fill: rgba(5, 22, 38, .94); stroke: var(--cap); stroke-width: 2.3; filter: url(#cyan-glow); }
@@ -328,6 +372,9 @@ const apps = [
 .backbone-shadow { fill: none; stroke: #20d8ff; stroke-width: 15; opacity: .18; filter: url(#cyan-glow); }
 .backbone-line { fill: none; stroke: url(#backbone); stroke-width: 6; stroke-linecap: round; filter: url(#cyan-glow); }
 .backbone-stream { fill: none; stroke: #e8fcff; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 2 18; animation: dash 1.2s linear infinite; }
+.detection-flow-shadow { fill: none; stroke: #20d8ff; stroke-width: 16; opacity: .2; filter: url(#cyan-glow); }
+.detection-flow-line { fill: none; stroke: #d8fbff; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 3 15; filter: url(#cyan-glow); animation: dash .95s linear infinite; }
+.detection-packet { fill: #eaffff; stroke: #20d8ff; stroke-width: 1.5; filter: url(#cyan-glow); }
 @keyframes dash { to { stroke-dashoffset: -180; } }
 
 .router { filter: url(#soft-shadow); }

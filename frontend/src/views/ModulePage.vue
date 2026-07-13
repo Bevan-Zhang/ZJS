@@ -5,7 +5,7 @@ import { api, type NodeInfo } from '../api/client'
 import DispatchPanel from '../components/DispatchPanel.vue'
 import ScriptButtons from '../components/ScriptButtons.vue'
 import PresetRunner from '../components/PresetRunner.vue'
-import HomeTopo from '../components/HomeTopo.vue'
+import HomeFabricTopo from '../components/HomeFabricTopo.vue'
 import DetectionResultPanel from '../components/DetectionResultPanel.vue'
 import RollTicker from '../components/RollTicker.vue'
 
@@ -77,8 +77,8 @@ watch(() => route.path, maybeLoad)
         <ScriptButtons :only="presets" @change="(m) => (active = m)" />
       </div>
 
-      <HomeTopo
-        :nodes="nodes" :probing="probing" :toggle="false" mode="detection"
+      <HomeFabricTopo
+        :nodes="nodes" :probing="probing" mode="detection"
         :link-flow="linkFlow" :listen-on="listenOn" :detect-on="detectOn"
         @probe="probeAll"
       />
